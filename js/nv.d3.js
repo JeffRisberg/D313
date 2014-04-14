@@ -5278,27 +5278,30 @@ nv.models.line = function() {
 
 
       var linePaths = groups.selectAll('path.nv-line')
-          .data(function(d) { return [d.values] });
+           .data(function(d) { return [d] });
       linePaths.enter().append('path')
-          .attr('class', 'nv-line')
-          .attr('d',
-            d3.svg.line()
-              .interpolate(interpolate)
-              .defined(defined)
-              .x(function(d,i) { return nv.utils.NaNtoZero(x0(getX(d,i))) })
-              .y(function(d,i) { return nv.utils.NaNtoZero(y0(getY(d,i))) })
-          );
+            .attr('class', 'nv-line')
+        
+           .style('stroke-width', function(d) {if(d['stroke-width']) return d['stroke-width'];}) 
+           .attr('d', function(d) {
+             return d3.svg.line()
+                .interpolate(interpolate)
+                .defined(defined)
+                .x(function(d,i) { return nv.utils.NaNtoZero(x0(getX(d,i))) })
+                .y(function(d,i) { return nv.utils.NaNtoZero(y0(getY(d,i))) })      
+               .apply(this, [d.values])
+           });
 
       linePaths
-          .transition()
-          .attr('d',
-            d3.svg.line()
-              .interpolate(interpolate)
-              .defined(defined)
-              .x(function(d,i) { return nv.utils.NaNtoZero(x(getX(d,i))) })
-              .y(function(d,i) { return nv.utils.NaNtoZero(y(getY(d,i))) })
-          );
-
+           .transition()
+           .attr('d', function(d) {
+             return d3.svg.line()
+                .interpolate(interpolate)
+                .defined(defined)
+                .x(function(d,i) { return nv.utils.NaNtoZero(x(getX(d,i))) })
+                .y(function(d,i) { return nv.utils.NaNtoZero(y(getY(d,i))) })
+               .apply(this, [d.values])
+           });
 
 
       //store old scales for use in transitions on update
@@ -8740,7 +8743,7 @@ nv.models.multiBarHorizontal = function() {
             .text(function(d,i) { return valueFormat(getY(d,i)) })
         bars.transition()
           .select('text')
-            .attr('x', function(d,i) { return getY(d,i) < 0 ? -4 : y(getY(d,i)) - y(0) + 4 })
+            .attr('x', function(d,i) { return getY(d,i) < 0 ? -4 : y(getY(d,i)) - y(y.domain()[0]) + 4 })
       } else {
         bars.selectAll('text').text('');
       }
@@ -8754,7 +8757,7 @@ nv.models.multiBarHorizontal = function() {
             .text(function(d,i) { return getX(d,i) });
         bars.transition()
           .select('text.nv-bar-label')
-            .attr('x', function(d,i) { return getY(d,i) < 0 ? y(0) - y(getY(d,i)) + 4 : -4 });
+            .attr('x', function(d,i) { return getY(d,i) < 0 ? y(y.domain()[0]) - y(getY(d,i)) + 4 : -4 });
       }
       else {
         bars.selectAll('text.nv-bar-label').text('');
@@ -8785,7 +8788,7 @@ nv.models.multiBarHorizontal = function() {
             .attr('transform', function(d,i) {
               //TODO: stacked must be all positive or all negative, not both?
               return 'translate(' +
-              (getY(d,i) < 0 ? y(getY(d,i)) : y(0))
+              (getY(d,i) < 0 ? y(getY(d,i)) : y(y.domain()[0]))
               + ',' +
               (d.series * x.rangeBand() / data.length
               +
@@ -8795,7 +8798,7 @@ nv.models.multiBarHorizontal = function() {
           .select('rect')
             .attr('height', x.rangeBand() / data.length )
             .attr('width', function(d,i) {
-              return Math.max(Math.abs(y(getY(d,i)) - y(0)),1)
+              return Math.max(Math.abs(y(getY(d,i)) - y(y.domain()[0])),1)
             });
 
 
