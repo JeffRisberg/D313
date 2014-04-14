@@ -46,7 +46,6 @@
 
     $("#includeZero").on("change", function (e) {
       includeZero = $('#includeZero').is(':checked');
-      console.log(includeZero);
 
       if (accountsList.length > 0) {
         redraw();
@@ -60,8 +59,8 @@
     });
 
     function redraw() {
-      var minValue = 9999999999999999999;
-      var maxValue = -9999999999999999999;
+      var minValue = Number.MAX_VALUE;
+      var maxValue = Number.MIN_VALUE;
 
       accountsList.forEach(function (account) {
         account.values.forEach(function (valuePair) {
@@ -71,8 +70,6 @@
           maxValue = Math.max(value, maxValue);
         })
       });
-      console.log(maxValue);
-      console.log(minValue);
 
       nv.addGraph(function () {
         var chart;
